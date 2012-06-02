@@ -24,6 +24,8 @@ faye.addExtension(serverAuthExt)
 # Start listening to the faye server port.
 faye.listen config.faye.port
 
+console.log "Started Node.js faye server on port #{config.faye.port}"
+
 # Get the faye client
 client = faye.getClient()
 client.addExtension(clientAuthExt)
