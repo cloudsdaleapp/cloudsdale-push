@@ -8,7 +8,7 @@
   "dependencies": {
     
     "faye": "0.8.2",
-    "amqp": "0.1.3",
+    "amqp": "git://github.com/mattbornski/node-amqp.git#master",
     "coffee-script": "*"
     
   }
