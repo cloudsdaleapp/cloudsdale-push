@@ -1,3 +1,5 @@
+console.log "Starting Node.js faye..."
+
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
 
@@ -41,6 +43,7 @@ connection = amqp.createConnection
 # When AMQP connection is ready, start subscribing to the faye queue.
 connection.on "ready", ->
   connection.queue "faye", { passive: true }, (queue) ->
+    console.log "Initialized Node.js faye AMQP connection..."
     queue.bind "#"
     queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
             
