@@ -39,10 +39,11 @@ connection = amqp.createConnection
   host: config.rabbit.host
   user: config.rabbit.user
   pass: config.rabbit.pass
+  reconnect: true
 
 # When AMQP connection is ready, start subscribing to the faye queue.
 connection.on "ready", ->
-  connection.queue "faye", { passive: true, durable: true, reconnect: true }, (queue) ->
+  connection.queue "faye", { passive: true, durable: true }, (queue) ->
     queue.bind "#"
     queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
       client.publish message.channel, message.data
