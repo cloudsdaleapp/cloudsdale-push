@@ -1,1 +1,1 @@
-(cd ./vendor/submodules/cloudsdale-faye && bundle && npm install && sleep 15 && node ./server.js)
+(cd ./vendor/submodules/cloudsdale-faye && git pull && bundle && npm install && sleep 10 && node ./server.js)

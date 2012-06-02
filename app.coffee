@@ -35,10 +35,7 @@ client.addExtension(clientAuthExt)
 client.connect()
 
 # Initialize the amqp consumer
-connection = amqp.createConnection
-  host: config.rabbit.host
-  user: config.rabbit.user
-  pass: config.rabbit.pass
+connection = amqp.createConnection { host: config.rabbit.host, user: config.rabbit.user, pass: config.rabbit.pass },
   reconnect: true
 
 # When AMQP connection is ready, start subscribing to the faye queue.
@@ -47,14 +44,15 @@ connection.on "ready", ->
     queue.bind "#"
     queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
       client.publish message.channel, message.data
-      
-  # try
-  #   init_queue()
-  # catch err
-  #   console.log "Error: #{err}"
-  #   console.log "cloud not connect to [faye] queue... retrying in 10 seconds..."
-  #   console.log "reload your web page to get the rails server to create the queue."
-  #   init_queue()
+
+    
+# try
+#   init_queue()
+# catch err
+#   console.log "Error: #{err}"
+#   console.log "cloud not connect to [faye] queue... retrying in 10 seconds..."
+#   console.log "reload your web page to get the rails server to create the queue."
+#   init_queue()
     
 # init_queue = ->
 #   connection.queue "faye", { passive: true, durable: true }, (queue) ->
