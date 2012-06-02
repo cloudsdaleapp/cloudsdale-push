@@ -1,4 +1,4 @@
-console.log "Starting Node.js faye..."
+console.log "=> Booting Node.js faye..."
 
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
@@ -26,7 +26,7 @@ faye.addExtension(serverAuthExt)
 # Start listening to the faye server port.
 faye.listen config.faye.port
 
-console.log "Started Node.js faye server on port #{config.faye.port}"
+console.log "=> Node.js cloudsdale-faye started on  ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path}"
 
 # Get the faye client
 client = faye.getClient()
@@ -40,11 +40,23 @@ connection = amqp.createConnection
   user: config.rabbit.user
   pass: config.rabbit.pass
 
+
+handle_queue = (queue) ->
+  queue.bind "#"
+  queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
+    client.publish message.channel, message.data
+
+init_queue = ->
+  connection.queue "faye", { passive: true }, (queue) ->
+    handle_queue(queue)
+
 # When AMQP connection is ready, start subscribing to the faye queue.
 connection.on "ready", ->
-  connection.queue "faye", { passive: true }, (queue) ->
-    console.log "Initialized Node.js faye AMQP connection..."
-    queue.bind "#"
-    queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
-            
-      client.publish message.channel, message.data
+  try
+    init_queue()
+  catch
+    console.log "cloud not connect to [faye] queue... retrying in 10 seconds..."
+    console.log "reload your web page to get the rails server to create the queue."
+    setTimeout ->
+      init_queue()
+    , 10000
