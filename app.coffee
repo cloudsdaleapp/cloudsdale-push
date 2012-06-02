@@ -40,23 +40,18 @@ connection = amqp.createConnection
   user: config.rabbit.user
   pass: config.rabbit.pass
 
-
-handle_queue = (queue) ->
-  queue.bind "#"
-  queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
-    client.publish message.channel, message.data
-
-init_queue = ->
-  connection.queue "faye", { passive: true }, (queue) ->
-    handle_queue(queue)
-
 # When AMQP connection is ready, start subscribing to the faye queue.
 connection.on "ready", ->
   try
     init_queue()
-  catch
+  catch err
+    console.log "Error: #{err}"
     console.log "cloud not connect to [faye] queue... retrying in 10 seconds..."
     console.log "reload your web page to get the rails server to create the queue."
-    setTimeout ->
-      init_queue()
-    , 10000
+    init_queue()
+    
+init_queue = ->
+  connection.queue "faye", { passive: true, durable: true }, (queue) ->
+    queue.bind "#"
+    queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
+      client.publish message.channel, message.data
