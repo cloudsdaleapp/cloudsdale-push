@@ -1,0 +1,103 @@
+# config/deploy.rb
+require "bundler/capistrano"
+require 'capistrano_colors'
+
+set :scm,             :git
+set :repository,      "git@github.com:IOMUSE/Cloudsdale-Faye.git"
+set :branch,          "origin/master"
+set :migrate_target,  :current
+set :ssh_options,     { :forward_agent => true }
+set :deploy_to,       "/opt/app"
+set :normalize_asset_timestamps, false
+set :default_run_options, :pty => true
+
+set :user,            "deploy"
+set :group,           "deploy"
+set :use_sudo,        true
+
+role :app,  "push01.cloudsdale.org", :primary => true
+
+set(:latest_release)  { fetch(:current_path) }
+set(:release_path)    { fetch(:current_path) }
+set(:current_release) { fetch(:current_path) }
+
+set(:current_revision)  { capture("cd #{current_path}; git rev-parse --short HEAD").strip }
+set(:latest_revision)   { capture("cd #{current_path}; git rev-parse --short HEAD").strip }
+set(:previous_revision) { capture("cd #{current_path}; git rev-parse --short HEAD@{1}").strip }
+
+default_environment["PATH"]         = "/usr/local/rvm/gems/ruby-1.9.3-p194/bin:/usr/local/rvm/gems/ruby-1.9.3-p194@global/bin:/usr/local/rvm/rubies/ruby-1.9.3-p194/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+default_environment["GEM_HOME"]     = "/usr/local/rvm/gems/ruby-1.9.3-p194"
+default_environment["GEM_PATH"]     = "/usr/local/rvm/gems/ruby-1.9.3-p194:/usr/local/rvm/gems/ruby-1.9.3-p194@global"
+default_environment["RUBY_VERSION"] = "ruby-1.9.3-p194"
+
+default_run_options[:shell] = 'bash'
+
+after 'deploy:assets:precompile', 'deploy:assets:upload', 'deploy:permissions:update'
+
+namespace :deploy do
+  task :default do
+    update
+    start
+  end
+
+  task :cold do
+    update
+    start
+  end
+  
+  task :setup, :expect => { :no_release => true } do
+    dirs  = [deploy_to, releases_path, shared_path]
+    dirs += shared_children.map { |d| File.join(shared_path, d) }
+    run "mkdir -p #{dirs.join(' ')}"
+    run "chmod g+w #{dirs.join(' ')}" if fetch(:group_writable, true)
+  end
+  
+  task :finalize_update, :except => { :no_release => true } do
+    run "chmod -R g+w #{latest_release}" if fetch(:group_writable, true)
+    run <<-CMD
+      rm -rf #{latest_release}/log #{latest_release}/node_modules &&
+      ln -s #{shared_path}/log #{latest_release}/log &&
+      ln -s #{shared_path}/node_modules #{latest_release}/node_modules
+    CMD
+  end
+  
+  task :start, :roles => :app do
+    run "#{sudo} restart #{application} || #{sudo} start #{application}"
+  end
+
+  task :stop, :roles => :app do
+    run "#{sudo} stop #{application}"
+  end
+
+  task :restart, :roles => :app do
+    start
+  end
+  
+  task :npm, :roles => :app do
+    run <<-CMD
+      export PATH=#{node_path}:$PATH &&
+      cd #{latest_release} &&
+      npm install 
+    CMD
+  end
+  
+  task :write_upstart_script, :roles => :app do
+    upstart_script = <<-UPSTART_SCRIPT
+description "#{application} upstart script"
+start on (local-filesystem and net-device-up)
+stop on shutdown
+respawn
+respawn limit 5 60
+script
+  chdir #{current_path}
+  exec sudo -u #{user} NODE_ENV="production" #{node_path}/node #{node_script} >> log/production.log 2>&1
+end script
+    UPSTART_SCRIPT
+    
+    put upstart_script "/tmp/#{application}.conf"
+    run "#{sudo} mv /tmp/#{application}.conf /etc/init"
+  end
+end
+
+after 'deploy:setup', 'deploy:write_upstart_script'
+after 'deploy:finalize_update', 'deploy:npm'

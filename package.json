@@ -1,0 +1,16 @@
+{
+  
+  "name": "cloudsdale-faye",
+  "version": "0.0.0",
+  "node": "0.6.18",
+  "description": "Used to push information to Cloudsdale Clients.",
+  "author" : { "name" : "Philip Vieira" },
+  "dependencies": {
+    
+    "faye": "0.8.2",
+    "amqp": "0.1.3",
+    "coffee-script": "*"
+    
+  }
+  
+}

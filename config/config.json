@@ -1,0 +1,34 @@
+{
+  "development": {
+    "faye": {
+      "host": "127.0.0.1",
+      "port": 8000,
+      "timeout": 45,
+      "path": "/push",
+      "token": "650659cd4801877e56a176d70dcd4851fa4c86327b3b9439fef2fbf77543b8e2"
+    },
+    
+    "rabbit": {
+      "host": "localhost",
+      "user": "guest",
+      "pass": "guest"
+    }
+  },
+  
+  "production": {
+    "faye": {
+      "host": "push01.snet.cloudsdale.org",
+      "port": 80,
+      "timeout": 45,
+      "path": "/push",
+      "token": "e854ebd38d63042f210214f95b5281b8934b359821cade18e52549e3788ef713"
+    },
+    
+    "rabbit": {
+      "host": "localhost",
+      "user": "guest",
+      "pass": "guest"
+    }
+  }
+  
+}
