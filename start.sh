@@ -1,3 +1,1 @@
-(cd ./ && bundle)
-npm install
-node ./server.js
+(cd ./ && bundle && npm install && node ./server.js)
