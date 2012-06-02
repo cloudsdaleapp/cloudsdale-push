@@ -1,1 +1,1 @@
-(cd ./ && bundle && npm install && node ./server.js)
+(cd ./ && bundle && npm install && sleep 30 && node ./server.js)
