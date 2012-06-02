@@ -23,19 +23,10 @@ set :node_script, "server.js"
 set :user,  "deploy"
 set :group, "deploy"
 set :use_sudo, true
-set :default_run_options, :pty => true
 
 role :app,  "push01.cloudsdale.org", :primary => true
 
 set :shared_children, %w(log node_modules)
-
-set(:latest_release)  { fetch(:current_path) }
-set(:release_path)    { fetch(:current_path) }
-set(:current_release) { fetch(:current_path) }
-
-set(:current_revision)  { capture("cd #{current_path}; git rev-parse --short HEAD").strip }
-set(:latest_revision)   { capture("cd #{current_path}; git rev-parse --short HEAD").strip }
-set(:previous_revision) { capture("cd #{current_path}; git rev-parse --short HEAD@{1}").strip }
 
 default_environment["NODE_ENV"]     = "production"
 default_environment["PATH"]         = "/usr/local/rvm/gems/ruby-1.9.3-p194/bin:/usr/local/rvm/gems/ruby-1.9.3-p194@global/bin:/usr/local/rvm/rubies/ruby-1.9.3-p194/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
@@ -44,6 +35,7 @@ default_environment["GEM_PATH"]     = "/usr/local/rvm/gems/ruby-1.9.3-p194:/usr/
 default_environment["RUBY_VERSION"] = "ruby-1.9.3-p194"
 
 default_run_options[:shell] = 'bash'
+default_run_options[:pty] = true
 
 namespace :deploy do
   task :default do
@@ -66,18 +58,18 @@ namespace :deploy do
   task :finalize_update, :except => { :no_release => true } do
     run "chmod -R g+w #{latest_release}" if fetch(:group_writable, true)
     run <<-CMD
-      rm -rf #{latest_release}/log #{latest_release}/node_modules &&
+      rm -Rf #{latest_release}/log #{latest_release}/node_modules &&
       ln -s #{shared_path}/log #{latest_release}/log &&
       ln -s #{shared_path}/node_modules #{latest_release}/node_modules
     CMD
   end
   
   task :start, :roles => :app do
-    run "#{sudo} restart #{application} || #{sudo} start #{application}"
+    # run "sudo -p restart #{application} || sudo -p start #{application}"
   end
 
   task :stop, :roles => :app do
-    run "#{sudo} stop #{application}"
+    # run "#{sudo} stop #{application}"
   end
 
   task :restart, :roles => :app do
@@ -88,26 +80,26 @@ namespace :deploy do
     run <<-CMD
       export PATH=#{node_path}:$PATH &&
       cd #{latest_release} &&
-      npm install 
+      npm install
     CMD
   end
   
   task :write_upstart_script, :roles => :app do
     upstart_script = <<-UPSTART_SCRIPT
     
-      description "#{application} upstart script"
-      start on (local-filesystem and net-device-up)
-      stop on shutdown
-      respawn
-      respawn limit 5 60
-      script
-        chdir #{current_path}
-        exec sudo -u #{user} NODE_ENV="production" #{node_path}/node #{node_script} >> log/production.log 2>&1
-      end script
+description "#{application} upstart script"
+start on (local-filesystem and net-device-up)
+stop on shutdown
+respawn
+respawn limit 5 60
+script
+  chdir #{current_path}
+  exec sudo -u #{user} NODE_ENV="production" node #{node_script} >> log/production.log 2>&1
+end script
 
     UPSTART_SCRIPT
-    
-    put upstart_script "/tmp/#{application}.conf"
+        
+    put upstart_script, "/tmp/#{application}.conf"
     run "#{sudo} mv /tmp/#{application}.conf /etc/init"
   end
 end
