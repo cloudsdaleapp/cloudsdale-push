@@ -8,7 +8,7 @@ global.config = require("./config/config.json")[app_env]
 
 # Load all dependent libraries
 http = require("http")
-faye = require("faye")
+faye = require("./node_modules/faye/build")
 amqp = require("amqp")
 
 # Initialize the faye server

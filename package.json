@@ -7,7 +7,7 @@
   "author" : { "name" : "Philip Vieira" },
   "dependencies": {
     
-    "faye": "0.8.2",
+    "faye": "git://github.com/faye/faye.git#master",
     "amqp": "git://github.com/mattbornski/node-amqp.git#master",
     "coffee-script": "*"
     
