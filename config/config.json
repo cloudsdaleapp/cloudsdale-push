@@ -1,5 +1,7 @@
 {
   "development": {
+    "pidFile": "./pids/server.pid",
+    "logFile": "./logs/server.log",
     "faye": {
       "host": "127.0.0.1",
       "port": 8000,
@@ -16,6 +18,8 @@
   },
   
   "production": {
+    "pidFile": "/var/run/faye.pid",
+    "logFile": "/var/log/faye.log",
     "faye": {
       "host": "push01.snet.cloudsdale.org",
       "port": 80,

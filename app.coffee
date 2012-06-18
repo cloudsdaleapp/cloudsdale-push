@@ -1,5 +1,3 @@
-console.log "=> Booting Node.js faye..."
-
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
 
@@ -7,45 +5,66 @@ global.app_env = process.env.NODE_ENV || "development"
 global.config = require("./config/config.json")[app_env]
 
 # Load all dependent libraries
+daemon = require("daemon")
 http = require("http")
 faye = require("./node_modules/faye/build")
 amqp = require("amqp")
 
-# Initialize the faye server
-faye = new faye.NodeAdapter
-  mount: config.faye.path
-  timeout: config.faye.timeout
+startServer = ->
+  console.log "=> Booting Node.js faye..."
+  
+  # Initialize the faye server
+  faye = new faye.NodeAdapter
+    mount: config.faye.path
+    timeout: config.faye.timeout
 
-# Require all extentions
-serverAuthExt = require("./ext/server_auth")
-clientAuthExt = require("./ext/client_auth")
+  # Require all extentions
+  serverAuthExt = require("./ext/server_auth")
+  clientAuthExt = require("./ext/client_auth")
 
-# Add all extentions
-faye.addExtension(serverAuthExt)
+  # Add all extentions
+  faye.addExtension(serverAuthExt)
 
-# Start listening to the faye server port.
-faye.listen config.faye.port
+  # Start listening to the faye server port.
+  faye.listen config.faye.port
 
-console.log "=> Node.js cloudsdale-faye started on  ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path}"
+  console.log "=> Node.js cloudsdale-faye started on  ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path}"
 
-# Get the faye client
-client = faye.getClient()
-client.addExtension(clientAuthExt)
+  # Get the faye client
+  client = faye.getClient()
+  client.addExtension(clientAuthExt)
 
-client.connect()
+  client.connect()
 
-# Initialize the amqp consumer
-connection = amqp.createConnection { host: config.rabbit.host, user: config.rabbit.user, pass: config.rabbit.pass },
-  reconnect: true
+  # Initialize the amqp consumer
+  connection = amqp.createConnection { host: config.rabbit.host, user: config.rabbit.user, pass: config.rabbit.pass },
+    reconnect: true
 
-# When AMQP connection is ready, start subscribing to the faye queue.
-connection.on "ready", ->
-  connection.queue "faye", { passive: true, durable: true }, (queue) ->
-    queue.bind "#"
-    queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
-      client.publish message.channel, message.data
+  # When AMQP connection is ready, start subscribing to the faye queue.
+  connection.on "ready", ->
+    connection.queue "faye", { passive: true, durable: true }, (queue) ->
+      queue.bind "#"
+      queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
+        client.publish message.channel, message.data
 
-    
+
+if app_env == "production"
+  
+  daemon.daemonize
+    stdout: config.logFile,
+    config.pidFile, (err, pid) ->
+      
+      return console.log("Master: error starting daemon: " + err) if err
+      console.log "Daemon started successfully with pid: " + pid
+  
+      daemon.closeStdin()
+      startServer()
+      
+else
+  startServer()
+
+  
+
 # try
 #   init_queue()
 # catch err

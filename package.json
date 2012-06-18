@@ -9,7 +9,8 @@
     
     "faye": "git://github.com/faye/faye.git#master",
     "amqp": "git://github.com/mattbornski/node-amqp.git#master",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "daemon": "*"
     
   }
   
