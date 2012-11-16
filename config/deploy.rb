@@ -40,12 +40,12 @@ default_run_options[:pty] = true
 namespace :deploy do
   task :default do
     update
-    restart
+    stop
   end
 
   task :cold do
     update
-    start
+    stop
   end
 
   task :setup, :expect => { :no_release => true } do
