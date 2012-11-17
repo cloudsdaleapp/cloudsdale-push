@@ -17,7 +17,7 @@ exports.outgoing = (message, callback) ->
 refreshPresence = (token,client_id) ->
   mongodb.collection 'users', (err, collection) ->
     collection.findOne { auth_token: token }, (err,user) ->
-      if user
+      if user != null
         setPresenceKeys(user,client_id,Date.now())
 
         fayengine.clientExists client_id, (connected,score) ->
