@@ -16,7 +16,10 @@ exports.outgoing = (message, callback) ->
 
 refreshPresence = (token,client_id) ->
   mongodb.collection 'users', (err, collection) ->
+    console.log err if err
     collection.findOne { auth_token: token }, (err,user) ->
+      console.log err if err
+      console.log user
       if user != null
         setPresenceKeys(user,client_id,Date.now())
 
