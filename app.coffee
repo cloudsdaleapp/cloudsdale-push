@@ -16,9 +16,15 @@ redis = require('redis')
 startServer = ->
   console.log "=> Booting Node.js faye..."
 
-  global.mongosrv = new mongo.Server config.mongo.host, config.mongo.port
+  global.mongosrv = new mongo.Server config.mongo.host, config.mongo.port,
+    poolSize: 10
+    auto_reconnect: true
+    socketOptions:
+      timeout: 60 * 1000
+
   global.mongodb = new mongo.Db config.mongo.database, mongosrv,
     safe: true
+
   mongodb.open (err, p_client) ->
     if err
       console.log err
