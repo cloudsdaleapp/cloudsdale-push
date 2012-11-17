@@ -29,7 +29,8 @@ startServer = ->
     if err
       console.log err
     else
-      console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
+      mongodb.authenticate config.mongo.database, config.mongo.password, {}, ->
+        console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
 
   # Initialize the faye server
   faye = new _faye.NodeAdapter

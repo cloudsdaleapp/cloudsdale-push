@@ -7,7 +7,6 @@ exports.incoming = (message, callback) ->
     client_id = message.clientId
 
     if message.subscription.match(/users\/(.*)\/private/ig)
-      console.log message
       refreshPresence(token,client_id) if token
 
   callback(message)
