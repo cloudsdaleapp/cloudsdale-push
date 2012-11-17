@@ -23,7 +23,7 @@ startServer = ->
     console.log err
     console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
 
-  setTimeout ->
+  setTimeout =>
     console.log @
   , 60000
 
