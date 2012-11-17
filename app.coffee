@@ -20,12 +20,10 @@ startServer = ->
   global.mongodb = new mongo.Db config.mongo.database, mongosrv,
     safe: true
   mongodb.open (err, p_client) ->
-    console.log err
-    console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
-
-  setTimeout =>
-    console.log @
-  , 60000
+    if err
+      console.log err
+    else
+      console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
 
   # Initialize the faye server
   faye = new _faye.NodeAdapter
