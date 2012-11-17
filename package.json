@@ -9,6 +9,8 @@
 
     "faye": "git://github.com/faye/faye.git#master",
     "faye-redis":"*",
+    "hiredis": "",
+    "redis": "",
     "amqp": "git://github.com/mattbornski/node-amqp.git#master",
     "coffee-script": "*",
     "daemon": "*",

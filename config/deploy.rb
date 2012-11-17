@@ -81,7 +81,7 @@ namespace :deploy do
       export PATH=#{node_path}:$PATH &&
       cd #{latest_release} &&
       rm #{latest_release}/node_modules &&
-      npm install &&
+      #{sudo} npm install &&
       cd #{latest_release}/node_modules/faye &&
       bundle install &&
       jake &&
