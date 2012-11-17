@@ -23,18 +23,21 @@ refreshPresence = (token,client_id) ->
         if connected
           setTimeout ->
             msg = { status: "online" }
-            broadcastOnClouds(user,msg,user.cloud_ids)
-            setTimeout ->
-              refreshPresence(token,client_id)
-            , 24000
+            broadcastOnClouds(user,msg,user.cloud_ids) if user
+            if token
+              setTimeout ->
+                refreshPresence(token,client_id)
+              , 24000
           , 6000
         else
-          last_seen = rediscli.get "cloudsdale/users/#{user._id}"
-          last_seen = 0 unless last_seen
-          if Date.now() > last_seen
-            deletePresenceKeys(user,client_id)
-            msg = { status: "offline" }
-            broadcastOnClouds(user,msg,user.cloud_ids)
+          if user
+            last_seen = rediscli.get "cloudsdale/users/#{user._id}"
+            last_seen = 0 unless last_seen
+            if Date.now() > last_seen
+
+              deletePresenceKeys(user,client_id)
+              msg = { status: "offline" }
+              broadcastOnClouds(user,msg,user.cloud_ids)
 
 setPresenceKeys = (user,client_id,time) ->
   user_id   = user._id
