@@ -17,27 +17,28 @@ exports.outgoing = (message, callback) ->
 refreshPresence = (token,client_id) ->
   mongodb.collection 'users', (err, collection) =>
     collection.findOne { auth_token: token }, (err,user) =>
-      setPresenceKeys(user,client_id,Date.now())
+      if user
+        setPresenceKeys(user,client_id,Date.now())
 
-      fayengine.clientExists client_id, (connected,score) =>
-        if connected
-          setTimeout ->
-            msg = { status: "online" }
-            broadcastOnClouds(user,msg,user.cloud_ids) if user
-            if token
-              setTimeout ->
-                refreshPresence(token,client_id)
-              , 24000
-          , 6000
-        else
-          if user
-            last_seen = rediscli.get "cloudsdale/users/#{user._id}"
-            last_seen = 0 unless last_seen
-            if Date.now() > last_seen
+        fayengine.clientExists client_id, (connected,score) =>
+          if connected
+            setTimeout ->
+              msg = { status: "online" }
+              broadcastOnClouds(user,msg,user.cloud_ids) if user
+              if token
+                setTimeout ->
+                  refreshPresence(token,client_id)
+                , 24000
+            , 6000
+          else
+            if user
+              last_seen = rediscli.get "cloudsdale/users/#{user._id}"
+              last_seen = 0 unless last_seen
+              if Date.now() > last_seen
 
-              deletePresenceKeys(user,client_id)
-              msg = { status: "offline" }
-              broadcastOnClouds(user,msg,user.cloud_ids)
+                deletePresenceKeys(user,client_id)
+                msg = { status: "offline" }
+                broadcastOnClouds(user,msg,user.cloud_ids)
 
 setPresenceKeys = (user,client_id,time) ->
   user_id   = user._id
