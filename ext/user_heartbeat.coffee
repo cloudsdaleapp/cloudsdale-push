@@ -7,7 +7,7 @@ exports.incoming = (message, callback) ->
     client_id = message.clientId
 
     if message.subscription.match(/users\/(.*)\/private/ig) && token
-      refreshPresence(token,client_id)
+      refreshPresence(token,client_id) if token
 
   callback(message)
 
