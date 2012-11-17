@@ -6,7 +6,8 @@ exports.incoming = (message, callback) ->
     token = message.ext.auth_token
     client_id = message.clientId
 
-    if message.subscription.match(/users\/(.*)\/private/ig) && token
+    if message.subscription.match(/users\/(.*)\/private/ig)
+      console.log message
       refreshPresence(token,client_id) if token
 
   callback(message)
@@ -16,10 +17,14 @@ exports.outgoing = (message, callback) ->
 
 refreshPresence = (token,client_id) ->
   mongodb.collection 'users', (err, collection) ->
-    console.log err if err
+    if err
+      console.log "EROOOOOOORNIGGER!"
+      console.log err
     collection.findOne { auth_token: token }, (err,user) ->
-      console.log err if err
-      console.log user
+      if err
+        console.log "EROOOOORASIAN!"
+        console.log err
+        console.log user
       if user != null
         setPresenceKeys(user,client_id,Date.now())
 
