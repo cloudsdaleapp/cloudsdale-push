@@ -23,6 +23,10 @@ startServer = ->
     console.log err
     console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
 
+  setTimeout ->
+    console.log @
+  , 60000
+
   # Initialize the faye server
   faye = new _faye.NodeAdapter
     mount: config.faye.path
