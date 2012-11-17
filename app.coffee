@@ -20,6 +20,7 @@ startServer = ->
   global.mongodb = new mongo.Db config.mongo.database, mongosrv,
     safe: true
   mongodb.open (err, p_client) ->
+    console.log err
     console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
 
   # Initialize the faye server
