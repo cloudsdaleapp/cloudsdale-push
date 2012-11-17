@@ -67,20 +67,21 @@ startServer = ->
         fayeCli.publish message.channel, message.data
 
 
-if app_env == "production"
+startServer()
+# if app_env == "production"
 
-  daemon.daemonize
-    stdout: config.logFile,
-    config.pidFile, (err, pid) ->
+#   daemon.daemonize
+#     stdout: config.logFile,
+#     config.pidFile, (err, pid) ->
 
-      return console.log("Master: error starting daemon: " + err) if err
-      console.log "Daemon started successfully with pid: " + pid
+#       return console.log("Master: error starting daemon: " + err) if err
+#       console.log "Daemon started successfully with pid: " + pid
 
-      daemon.closeStdin()
-      startServer()
+#       daemon.closeStdin()
+#       startServer()
 
-else
-  startServer()
+# else
+#   startServer()
 
 
 
