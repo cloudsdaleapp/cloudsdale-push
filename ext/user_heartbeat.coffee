@@ -33,7 +33,6 @@ refreshPresence = (token,client_id) ->
           last_seen = 0 unless last_seen
           if Date.now() > last_seen
             deletePresenceKeys(user,client_id)
-            console.log "Offline!? - #{user.name}"
             msg = { status: "offline" }
             broadcastOnClouds(user,msg,user.cloud_ids)
 
