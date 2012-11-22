@@ -17,20 +17,18 @@ exports.outgoing = (message, callback) ->
 refreshPresence = (token,client_id) ->
   mongodb.collection 'users', (err, collection) ->
     if err
-      console.log "EROOOOOOORNIGGER!"
       console.log err
     collection.findOne { auth_token: token }, (err,user) ->
       if err
-        console.log "EROOOOORASIAN!"
         console.log err
-        console.log user
       if user != null
         setPresenceKeys(user,client_id,Date.now())
 
         fayengine.clientExists client_id, (connected,score) ->
           if connected
             setTimeout ->
-              msg = { status: "online" }
+              status = user.preferred_status
+              msg = { status: status }
               broadcastOnClouds(user,msg,user.cloud_ids)
               setTimeout ->
                 refreshPresence(token,client_id)
