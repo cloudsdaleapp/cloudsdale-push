@@ -48,11 +48,13 @@ startServer = ->
   global.rediscli = faye._server._engine._engine._redis
 
   # Require all extentions
+  userAuthExt   = require("./ext/user_auth")
   serverAuthExt = require("./ext/server_auth")
   clientAuthExt = require("./ext/client_auth")
   userHeartbeat = require("./ext/user_heartbeat")
 
   # Add all extentions
+  faye.addExtension(userAuthExt)
   faye.addExtension(serverAuthExt)
   faye.addExtension(userHeartbeat)
 
