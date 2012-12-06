@@ -82,5 +82,5 @@ broadcastStatus = (user,status) ->
 
   if cloudIds
     for cloudId in cloudIds
-      do (cloudId) -> fayeCli.publish "/clouds/#{cloudId}/users/#{userId}", { status: status }
+      do (cloudId) -> fayeCli.publish "/clouds/#{cloudId}/users/#{userId}", { id: userId, status: status }
 
