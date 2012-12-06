@@ -2,71 +2,75 @@ exports.incoming = (message, callback) ->
 
   message.ext ||= {}
 
-  if message.channel.match(/meta\/subscribe/ig)
-    token = message.ext.auth_token
-    client_id = message.clientId
+  userId = message.ext.user_id
+  clientId = message.clientId
 
-    if message.subscription.match(/users\/(.*)\/private/ig)
-      refreshPresence(token,client_id) if token
+  if clientId && userId && message.channel.match(/meta\/connect/ig)
+    console.log "User ID: #{userId}"
+    startHeartbeat(userId,clientId)
 
   callback(message)
 
 exports.outgoing = (message, callback) ->
   callback(message)
 
-refreshPresence = (token,client_id) ->
+startHeartbeat = (userId,clientId) ->
+  setInterval ->
+    refreshPresence(userId,clientId,this)
+  , 30000
+
+refreshPresence = (userId,clientId,hearbeatInterval) ->
   mongodb.collection 'users', (err, collection) ->
-    if err
-      console.log err
-    collection.findOne { auth_token: token }, (err,user) ->
-      if err
-        console.log err
-      if user != null
-        setPresenceKeys(user,client_id,Date.now())
+    console.log err if err
+    collection.findOne { _id: userId }, (err,user) ->
+      console.log err if err
+      checkStatusAndBroadcast(user,clientId,hearbeatInterval) if user != null
 
-        fayengine.clientExists client_id, (connected,score) ->
-          if connected
-            setTimeout ->
-              status = user.preferred_status
-              msg = { status: status }
-              broadcastOnClouds(user,msg,user.cloud_ids)
-              setTimeout ->
-                refreshPresence(token,client_id)
-              , 24000
-            , 6000
-          else
-            last_seen = rediscli.get "cloudsdale/users/#{user._id}"
-            last_seen = 0 unless last_seen
-            if Date.now() > last_seen
-              deletePresenceKeys(user,client_id)
-              msg = { status: "offline" }
-              broadcastOnClouds(user,msg,user.cloud_ids)
+checkStatusAndBroadcast = (user,clientId,hearbeatInterval) ->
+  setUserHeartbeat(user,Date.now())
 
-setPresenceKeys = (user,client_id,time) ->
-  user_id   = user._id
-  cloud_ids = user.cloud_ids
+  fayengine.clientExists clientId, (connected,score) ->
+    if connected
+      status = user.preferred_status
+      broadcastStatus(user,status) unless status == "offline"
+    else
+      rediscli.get "cloudsdale/users/#{user._id}", (err, lastSeen) ->
+        lastSeen ||= 0
 
-  rediscli.set "cloudsdale/users/#{user_id}", time
+        if Date.now() > lastSeen
+          clearUserHeartbeat(user,clientId)
+          broadcastStatus(user,"offline")
 
-  if cloud_ids
-    for cloud_id in cloud_ids
-      do (cloud_id) ->
-        rediscli.hset "cloudsdale/clouds/#{cloud_id}/users", user_id, time
+      clearInterval(hearbeatInterval)
 
-deletePresenceKeys = (user,client_id) ->
-  user_id   = user._id
-  cloud_ids = user.cloud_ids
+setUserHeartbeat = (user,time) ->
+  userId   = user._id
+  cloudIds = user.cloud_ids
 
-  rediscli.del "cloudsdale/users/#{user_id}"
+  rediscli.set "cloudsdale/users/#{userId}", time
+  rediscli.expire "cloudsdale/users/#{userId}", redisExpire
 
-  if cloud_ids
-    for cloud_id in cloud_ids
-      do (cloud_id) ->
-        rediscli.hdel "cloudsdale/clouds/#{cloud_id}/users", user_id
+  if cloudIds
+    for cloudId in cloudIds
+      do (cloudId) -> rediscli.hset "cloudsdale/clouds/#{cloudId}/users", userId, time
 
-broadcastOnClouds = (user,msg,cloud_ids) ->
-  if cloud_ids
-    for cloud_id in cloud_ids
-      do (cloud_id) ->
-        fayeCli.publish "/clouds/#{cloud_id}/users/#{user._id}", msg
+clearUserHeartbeat = (user) ->
+  userId   = user._id
+  cloudIds = user.cloud_ids
+
+  rediscli.del "cloudsdale/users/#{userId}"
+
+  if cloudIds
+    for cloudId in cloudIds
+      do (cloudId) -> rediscli.hdel "cloudsdale/clouds/#{cloudId}/users", userId
+
+broadcastStatus = (user,status) ->
+
+  userId   = user._id
+  cloudIds = user.cloud_ids
+  status   = status || "offline"
+
+  if cloudIds
+    for cloudId in cloudIds
+      do (cloudId) -> fayeCli.publish "/clouds/#{cloudId}/users/#{userId}", { status: status }
 
