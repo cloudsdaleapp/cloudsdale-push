@@ -6,10 +6,10 @@ exports.incoming = (message, callback) ->
   # Clear user id so that users cannot set it themselves
   delete message.ext["user_id"]
 
-  console.log "----------------------------------"
-  console.log "Client ID: #{message.clientId}"
-  console.log "Message on '#{message.channel}'"
-  console.log "Auth Token: #{token}"
+  # console.log "----------------------------------"
+  # console.log "Client ID: #{message.clientId}"
+  # console.log "Message on '#{message.channel}'"
+  # console.log "Auth Token: #{token}"
 
   if token
     rediscli.get "cloudsdale/users/#{token}/id", (err,userId) ->
