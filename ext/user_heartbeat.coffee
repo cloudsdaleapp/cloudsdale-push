@@ -8,8 +8,7 @@ exports.incoming = (message, callback) ->
   if clientId && userId && message.channel.match(/meta\/connect/ig)
     console.log "User ID: #{userId}"
     startHeartbeat(userId,clientId)
-
-  if clientId && message.channel.match(/meta\/subscribe/ig)
+  else if clientId && message.channel.match(/meta\/subscribe/ig)
     privateChannelMatch = /^\/users\/(.{24})\/private$/ig.exec(message.subscription)
     if privateChannelMatch
       userId = privateChannelMatch[1]
