@@ -12,7 +12,7 @@ http = require("http")
 _faye = require("./node_modules/faye/build")
 fayeRedis = require('faye-redis')
 amqp = require("amqp")
-mongo = require('mongodb')
+global.mongo = require('mongodb')
 redis = require('redis')
 
 startServer = ->
