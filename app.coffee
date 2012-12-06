@@ -4,6 +4,8 @@ global.app_env = process.env.NODE_ENV || "development"
 # Setup the environment configuration
 global.config = require("./config/config.json")[app_env]
 
+global.redisExpire = 86400
+
 # Load all dependent libraries
 daemon = require("daemon")
 http = require("http")
