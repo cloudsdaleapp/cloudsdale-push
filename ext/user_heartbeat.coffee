@@ -15,6 +15,9 @@ exports.outgoing = (message, callback) ->
   callback(message)
 
 startHeartbeat = (userId,clientId) ->
+  setTimeout ->
+    refreshPresence(userId,clientId)
+  , 2000
   setInterval ->
     refreshPresence(userId,clientId,this)
   , 30000
@@ -22,7 +25,7 @@ startHeartbeat = (userId,clientId) ->
 refreshPresence = (userId,clientId,hearbeatInterval) ->
   mongodb.collection 'users', (err, collection) ->
     console.log err if err
-    collection.findOne { _id: userId }, (err,user) ->
+    collection.findOne { _id: new mongo.ObjectID(userId) }, (err,user) ->
       console.log err if err
       checkStatusAndBroadcast(user,clientId,hearbeatInterval) if user != null
 
@@ -41,7 +44,7 @@ checkStatusAndBroadcast = (user,clientId,hearbeatInterval) ->
           clearUserHeartbeat(user,clientId)
           broadcastStatus(user,"offline")
 
-      clearInterval(hearbeatInterval)
+      clearInterval(hearbeatInterval) if hearbeatInterval
 
 setUserHeartbeat = (user,time) ->
   userId   = user._id
