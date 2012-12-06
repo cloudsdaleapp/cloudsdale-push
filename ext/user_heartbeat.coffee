@@ -2,14 +2,14 @@ exports.incoming = (message, callback) ->
 
   message.ext ||= {}
 
-  userId = message.ext.user_id
   clientId = message.clientId
 
   if clientId && message.channel.match(/meta\/subscribe/ig)
     privateChannelMatch = /^\/users\/(.{24})\/private$/ig.exec(message.subscription)
     if privateChannelMatch
-      userId = privateChannelMatch[1] unless userId
-      startHeartbeat(userId,clientId)
+      userId = message.ext.user_id || privateChannelMatch[1]
+      if userId
+        startHeartbeat(userId,clientId) if userId.match(/^.{24}$/)
 
   callback(message)
 
