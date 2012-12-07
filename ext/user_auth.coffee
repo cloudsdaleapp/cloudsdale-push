@@ -15,7 +15,7 @@ exports.incoming = (message, callback) ->
     rediscli.get "cloudsdale/users/#{token}/id", (err,userId) ->
       callback(message) if err
       if userId
-        message.ext.user_id = userId
+        message.ext.user_id = userId.toString()
         callback(message)
       else
         mongodb.collection 'users', (err, collection) ->
@@ -23,9 +23,10 @@ exports.incoming = (message, callback) ->
           collection.findOne { auth_token: token }, (err,user) ->
             callback(message) if err
             if user != null
-              rediscli.set "cloudsdale/users/#{token}/id", user._id
+              userId = user._id.toString()
+              rediscli.set "cloudsdale/users/#{token}/id", userId
               rediscli.expire "cloudsdale/users/#{token}/id", redisExpire
-              message.ext.user_id = user._id
+              message.ext.user_id = userId
               callback(message)
             else
               callback(message)

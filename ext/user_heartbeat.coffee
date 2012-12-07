@@ -39,7 +39,7 @@ checkStatusAndBroadcast = (user,clientId,hearbeatInterval) ->
       status = user.preferred_status
       broadcastStatus(user,status) unless status == "offline"
     else
-      rediscli.get "cloudsdale/users/#{user._id}", (err, lastSeen) ->
+      rediscli.get "cloudsdale/users/#{user._id.toString()}", (err, lastSeen) ->
         lastSeen ||= 0
 
         if Date.now() > lastSeen
@@ -49,7 +49,7 @@ checkStatusAndBroadcast = (user,clientId,hearbeatInterval) ->
       clearInterval(hearbeatInterval) if hearbeatInterval
 
 setUserHeartbeat = (user,time) ->
-  userId   = user._id
+  userId   = user._id.toString()
   cloudIds = user.cloud_ids
 
   rediscli.set "cloudsdale/users/#{userId}", time
@@ -60,7 +60,7 @@ setUserHeartbeat = (user,time) ->
       do (cloudId) -> rediscli.hset "cloudsdale/clouds/#{cloudId}/users", userId, time
 
 clearUserHeartbeat = (user) ->
-  userId   = user._id
+  userId   = user._id.toString()
   cloudIds = user.cloud_ids
 
   rediscli.del "cloudsdale/users/#{userId}"
@@ -71,7 +71,7 @@ clearUserHeartbeat = (user) ->
 
 broadcastStatus = (user,status) ->
 
-  userId   = user._id
+  userId   = user._id.toString()
   cloudIds = user.cloud_ids
   status   = status || "offline"
 
