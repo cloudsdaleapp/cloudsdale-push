@@ -14,7 +14,8 @@
     "amqp": "git://github.com/mattbornski/node-amqp.git#master",
     "coffee-script": "*",
     "daemon": "*",
-    "mongodb":"*"
+    "mongodb":"*",
+    "nodetime":"*"
 
   }
 

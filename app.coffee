@@ -1,5 +1,10 @@
+
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
+
+require("nodetime").profile
+  accountKey: "772a1d683f599c2ed95cce79bb82308cd9d1e36c"
+  appName: "Cloudsdale #{app_env}"
 
 # Setup the environment configuration
 global.config = require("./config/config.json")[app_env]
@@ -94,8 +99,6 @@ if app_env == "production"
 
 else
   startServer()
-
-
 
 # try
 #   init_queue()
