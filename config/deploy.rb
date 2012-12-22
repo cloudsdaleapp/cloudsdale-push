@@ -84,10 +84,12 @@ namespace :deploy do
       #{sudo} npm install &&
       cd #{latest_release}/node_modules/faye &&
       bundle install &&
-      jake &&
+      bundle exec jake &&
       cd #{latest_release}
     CMD
   end
+  #{sudo} chown -R deploy:deploy #{latest_release} &&
+
 
 end
 

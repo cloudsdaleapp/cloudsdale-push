@@ -7,7 +7,7 @@
   "author" : { "name" : "Philip Vieira" },
   "dependencies": {
 
-    "faye": "git://github.com/faye/faye.git#master",
+    "faye": "git://github.com/Zeeraw/faye.git#f1e58aed6555d034c48abc7e613d08c693640fc3",
     "faye-redis":"*",
     "hiredis": "",
     "redis": "",
