@@ -5,7 +5,7 @@
     "faye": {
       "host": "127.0.0.1",
       "port": 8000,
-      "secure_port": 443,
+      "secure_port": 44300,
       "timeout": 45,
       "path": "/push",
       "token": "650659cd4801877e56a176d70dcd4851fa4c86327b3b9439fef2fbf77543b8e2"
