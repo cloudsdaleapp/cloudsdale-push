@@ -66,13 +66,15 @@ startServer = ->
   # Start listening to the faye server port.
   faye.listen config.faye.port
 
+  console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path}"
+
   # Start listening to the secure port using SSL.
   faye.listen config.faye.secure_port,
     key: "./cert/cloudsdale.org.key"
     cert: "./cert/cloudsdale.org.cert"
 
 
-  console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path}"
+  console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path}"
 
   # Get the faye client
   global.fayeCli = faye.getClient()
