@@ -18,26 +18,26 @@ exports.outgoing = (message, callback) ->
 
 startHeartbeat = (userId,clientId) ->
   setTimeout ->
-    refreshPresence(userId,clientId)
+    refreshPresence(userId,clientId,undefined,true)
   , 2000
   setInterval ->
-    refreshPresence(userId,clientId,this)
+    refreshPresence(userId,clientId,this,false)
   , 30000
 
-refreshPresence = (userId,clientId,hearbeatInterval) ->
+refreshPresence = (userId,clientId,hearbeatInterval,firstPass) ->
   mongodb.collection 'users', (err, collection) ->
     console.log err if err
     collection.findOne { _id: new mongo.ObjectID(userId) }, (err,user) ->
       console.log err if err
-      checkStatusAndBroadcast(user,clientId,hearbeatInterval) if user != null
+      checkStatusAndBroadcast(user,clientId,hearbeatInterval,firstPass) if user != null
 
-checkStatusAndBroadcast = (user,clientId,hearbeatInterval) ->
+checkStatusAndBroadcast = (user,clientId,hearbeatInterval,firstPass) ->
   setUserHeartbeat(user,Date.now())
 
   fayengine.clientExists clientId, (connected,score) ->
     if connected
       status = user.preferred_status
-      broadcastStatus(user,status) unless status == "offline"
+      broadcastStatus(user,status) if (status != "offline") and (firstPass == true)
     else
       rediscli.get "cloudsdale/users/#{user._id.toString()}", (err, lastSeen) ->
         lastSeen ||= 0
