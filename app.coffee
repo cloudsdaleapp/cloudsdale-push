@@ -67,6 +67,7 @@ startServer = ->
   if app_env == "production"
     # Start listening to a unix socket.
 
+    fs.futimesSync config.faye.socket
     fs.unlinkSync config.faye.socket
 
     oldmask = process.umask(0o0000)
@@ -82,6 +83,10 @@ startServer = ->
 
   if app_env == "production"
     # Start listening to the secure port using SSL.
+
+    fs.futimesSync config.faye.socketSecure
+    fs.unlinkSync config.faye.socketSecure
+
     oldmask = process.umask(0o0000)
     faye.listen config.faye.socketSecure,
       key: config.sslKey
