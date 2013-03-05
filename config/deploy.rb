@@ -19,7 +19,7 @@ set :ssh_options,     { :forward_agent => true }
 
 set :deploy_via,  :remote_cache
 set :deploy_to,   "/opt/app/#{application}"
-set :node_path,   "/usr/bin/node"
+set :node_path,   "/opt/node/bin"
 set :node_script, "server.js"
 set :node_env,    "production"
 
