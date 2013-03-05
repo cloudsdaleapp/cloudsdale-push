@@ -38,6 +38,7 @@
     "sslCert": "/var/cert/cloudsdale.org.cert",
     "faye": {
       "host": "ovh.push.cloudsdale.org",
+      "socket": "/tmp/cloudsdale-push.socket",
       "port": 80,
       "secure_port": 443,
       "timeout": 45,
