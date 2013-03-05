@@ -73,15 +73,16 @@ startServer = ->
       fs.utimesSync config.faye.socket, new Date(), new Date()
       fs.unlinkSync config.faye.socket
 
-    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
-
     faye.listen config.faye.socket,
       key: config.sslKey
       cert: config.sslCert
+    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
 
-    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+    fs.unlinkSync config.faye.socket
 
     faye.listen config.faye.socket
+    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+
     process.umask(oldmask)
 
   else
