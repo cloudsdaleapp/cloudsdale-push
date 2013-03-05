@@ -69,6 +69,9 @@ startServer = ->
     fs.unlink config.faye.socket, ->
       faye.listen config.faye.socket
       console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+
+    faye.listen 9292
+
   else
     # Start listening to the faye server port.
     faye.listen config.faye.port
