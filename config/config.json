@@ -34,8 +34,10 @@
   "production": {
     "pidFile": "/var/run/faye.pid",
     "logFile": "/var/log/faye.log",
+    "sslKey": "/var/cert/cloudsdale.org.key",
+    "sslCert": "/var/cert/cloudsdale.org.cert",
     "faye": {
-      "host": "push01.snet.cloudsdale.org",
+      "host": "ovh.push.cloudsdale.org",
       "port": 80,
       "secure_port": 443,
       "timeout": 45,
@@ -53,12 +55,12 @@
       "username": "cloudsdale",
       "password": "62148f9b9158ead23c8ace8c1b081055d068a216d3096b95f6399508f6674d6e3bf6ebbfcdbe85b126b431a8674a1d59370918683781976be5cfeba2c89f94b4",
       "database": "cloudsdale",
-      "host": "db.s.cloudsdale.org",
+      "host": "ovh.cloudsdale.org",
       "port":27017
     },
 
     "redis": {
-      "host" : "db.s.cloudsdale.org",
+      "host" : "ovh.cloudsdale.org",
       "port" : 6379
     }
   }
