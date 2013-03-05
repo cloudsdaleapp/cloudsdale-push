@@ -8,10 +8,12 @@ require 'capistrano_colors'
 # To Public License, Version 2, as published by Sam Hocevar. See
 # http://sam.zoy.org/wtfpl/COPYING for more details.
 
-set :application, "cloudsdale"
+set :application, "cloudsdale-push"
+set :ruby_version,  "ruby-1.9.3-p194"
+
 set :scm,         :git
 set :repository,  "git@github.com:IOMUSE/Cloudsdale-Faye.git"
-set :branch,      "master"
+set :branch,      "ovh-migration"
 
 set :ssh_options,     { :forward_agent => true }
 
@@ -19,20 +21,21 @@ set :deploy_via,  :remote_cache
 set :deploy_to,   "/opt/app/#{application}"
 set :node_path,   "/usr/bin/node"
 set :node_script, "server.js"
+set :node_env,    "production"
 
 set :user,  "deploy"
 set :group, "deploy"
 set :use_sudo, true
 
-role :app,  "push01.cloudsdale.org", :primary => true
+role :app,  "ovh.cloudsdale.org", :primary => true
 
 set :shared_children, %w(log node_modules)
 
-default_environment["NODE_ENV"]     = "production"
-default_environment["PATH"]         = "/usr/local/rvm/gems/ruby-1.9.3-p194/bin:/usr/local/rvm/gems/ruby-1.9.3-p194@global/bin:/usr/local/rvm/rubies/ruby-1.9.3-p194/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
-default_environment["GEM_HOME"]     = "/usr/local/rvm/gems/ruby-1.9.3-p194"
-default_environment["GEM_PATH"]     = "/usr/local/rvm/gems/ruby-1.9.3-p194:/usr/local/rvm/gems/ruby-1.9.3-p194@global"
-default_environment["RUBY_VERSION"] = "ruby-1.9.3-p194"
+default_environment["NODE_ENV"]     = node_env
+default_environment["PATH"]         = "/usr/local/rvm/gems/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@#{application}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+default_environment["GEM_HOME"]     = "/usr/local/rvm/gems/#{ruby_version}"
+default_environment["GEM_PATH"]     = "/usr/local/rvm/gems/#{ruby_version}@#{application}:/usr/local/rvm/gems/#{ruby_version}@global"
+default_environment["RUBY_VERSION"] = "#{ruby_version}"
 
 default_run_options[:shell] = 'bash'
 default_run_options[:pty] = true
