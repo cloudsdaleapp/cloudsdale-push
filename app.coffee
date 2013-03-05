@@ -69,7 +69,7 @@ startServer = ->
 
     fs.unlinkSync config.faye.socket
 
-    oldmask = process.umask(0000)
+    oldmask = process.umask(0o0000)
     faye.listen config.faye.socket
     process.umask(oldmask)
 
