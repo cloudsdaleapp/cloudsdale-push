@@ -66,9 +66,13 @@ startServer = ->
 
   if app_env == "production"
     # Start listening to a unix socket.
+
     fs.unlink config.faye.socket, ->
+      oldmask = process.umask(0000)
       faye.listen config.faye.socket
+      process.umask(oldmask)
       console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+
 
     faye.listen 9292
 
@@ -77,14 +81,14 @@ startServer = ->
     faye.listen config.faye.port
     console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (port)"
 
-  if app_env == "production"
-    # Start listening to the secure port using SSL.
-    fs.unlink config.faye.socket, ->
-      faye.listen config.faye.socketSecure,
-        key: config.sslKey
-        cert: config.sslCert
+  # if app_env == "production"
+  #   # Start listening to the secure port using SSL.
+  #   fs.unlink config.faye.socket, ->
+  #     faye.listen config.faye.socketSecure,
+  #       key: config.sslKey
+  #       cert: config.sslCert
 
-    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
+  #   console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
 
   # Get the faye client
   global.fayeCli = faye.getClient()
