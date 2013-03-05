@@ -7,6 +7,7 @@ GEM
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
+    capistrano_colors (0.5.5)
     highline (1.6.12)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
@@ -21,3 +22,4 @@ PLATFORMS
 
 DEPENDENCIES
   capistrano
+  capistrano_colors
