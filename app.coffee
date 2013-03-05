@@ -2,6 +2,8 @@
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
 
+console.log "~ NodeJS #{global.app_env} environment ~"
+
 require("nodetime").profile
   accountKey: "772a1d683f599c2ed95cce79bb82308cd9d1e36c"
   appName: "Cloudsdale #{app_env}"
