@@ -19,6 +19,7 @@ fayeRedis = require('faye-redis')
 amqp = require("amqp")
 global.mongo = require('mongodb')
 redis = require('redis')
+fs = require('fs')
 
 startServer = ->
   console.log "=> Booting Node.js faye [#{global.app_env}]"
@@ -65,8 +66,9 @@ startServer = ->
 
   if app_env == "production"
     # Start listening to a unix socket.
-    faye.listen config.faye.socket
-    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+    fs.unlink config.faye.socket, ->
+      faye.listen config.faye.socket
+      console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
   else
     # Start listening to the faye server port.
     faye.listen config.faye.port
