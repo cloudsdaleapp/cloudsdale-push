@@ -67,11 +67,13 @@ startServer = ->
   if app_env == "production"
     # Start listening to a unix socket.
 
-    fs.unlink config.faye.socket, ->
-      oldmask = process.umask(0000)
-      faye.listen config.faye.socket
-      process.umask(oldmask)
-      console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+    fs.unlinkSync config.faye.socket
+
+    oldmask = process.umask(0000)
+    faye.listen config.faye.socket
+    process.umask(oldmask)
+
+    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
 
 
     faye.listen 9292
