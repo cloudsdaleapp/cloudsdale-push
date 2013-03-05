@@ -67,10 +67,12 @@ startServer = ->
   if app_env == "production"
     # Start listening to a unix socket.
 
-    fs.utimesSync config.faye.socket, new Date(), new Date()
-    fs.unlinkSync config.faye.socket
-
     oldmask = process.umask(0o0000)
+
+    if fs.existsSync config.faye.socket
+      fs.utimesSync config.faye.socket, new Date(), new Date()
+      fs.unlinkSync config.faye.socket
+
     faye.listen config.faye.socket
     process.umask(oldmask)
 
@@ -82,12 +84,14 @@ startServer = ->
     console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (port)"
 
   if app_env == "production"
-    # Start listening to the secure port using SSL.
-
-    fs.utimesSync config.faye.socketSecure, new Date(), new Date()
-    fs.unlinkSync config.faye.socketSecure
+    # Start listening to the secure unix socket.
 
     oldmask = process.umask(0o0000)
+
+    if fs.existsSync config.faye.socketSecure
+      fs.utimesSync config.faye.socketSecure, new Date(), new Date()
+      fs.unlinkSync config.faye.socketSecure
+
     faye.listen config.faye.socketSecure,
       key: config.sslKey
       cert: config.sslCert
