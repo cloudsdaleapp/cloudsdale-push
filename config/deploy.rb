@@ -15,6 +15,7 @@ set :scm,         :git
 set :repository,  "git@github.com:IOMUSE/Cloudsdale-Faye.git"
 set :branch,      "ovh-migration"
 
+set :migrate_target,  :current
 set :ssh_options,     { :forward_agent => true }
 
 set :deploy_via,  :remote_cache
@@ -23,16 +24,18 @@ set :node_path,   "/opt/node/bin"
 set :node_script, "server.js"
 set :node_env,    "production"
 
+set :rvm,         "/usr/local/rvm/bin/rvm"
+
 set :user,  "deploy"
 set :group, "deploy"
-set :use_sudo, true
+set :use_sudo, false
 
 role :app,  "ovh.cloudsdale.org", :primary => true
 
 set :shared_children, %w(log node_modules)
 
 default_environment["NODE_ENV"]     = node_env
-default_environment["PATH"]         = "/usr/local/rvm/gems/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@#{application}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+default_environment["PATH"]         = "/usr/local/rvm/gems/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/gems/#{ruby_version}@#{application}/bin:/usr/local/rvm/gems/#{ruby_version}@global/bin:/usr/local/rvm/rubies/#{ruby_version}/bin:/usr/local/rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:#{node_path}"
 default_environment["GEM_HOME"]     = "/usr/local/rvm/gems/#{ruby_version}"
 default_environment["GEM_PATH"]     = "/usr/local/rvm/gems/#{ruby_version}@#{application}:/usr/local/rvm/gems/#{ruby_version}@global"
 default_environment["RUBY_VERSION"] = "#{ruby_version}"
@@ -81,19 +84,28 @@ namespace :deploy do
 
   task :npm, :roles => :app do
     run <<-CMD
-      export PATH=#{node_path}:$PATH &&
+      echo $USER
+    CMD
+
+    run <<-CMD
       cd #{latest_release} &&
       rm #{latest_release}/node_modules &&
-      #{sudo} npm install &&
+      npm install &&
       cd #{latest_release}/node_modules/faye &&
-      bundle install &&
-      bundle exec jake &&
+      #{bundle} install &&
+      #{bundle} exec jake &&
       cd #{latest_release}
     CMD
   end
-  #{sudo} chown -R deploy:deploy #{latest_release} &&
-
 
 end
 
 after 'deploy:finalize_update', 'deploy:npm'
+
+def sudo
+  "sudo env PATH=$PATH"
+end
+
+def bundle
+  "/usr/local/rvm/gems/#{ruby_version}@#{application}/bin/bundle"
+end
