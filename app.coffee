@@ -2,8 +2,6 @@
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
 
-console.log "~ NodeJS #{global.app_env} environment ~"
-
 require("nodetime").profile
   accountKey: "772a1d683f599c2ed95cce79bb82308cd9d1e36c"
   appName: "Cloudsdale #{app_env}"
@@ -23,7 +21,7 @@ global.mongo = require('mongodb')
 redis = require('redis')
 
 startServer = ->
-  console.log "=> Booting Node.js faye..."
+  console.log "=> Booting Node.js faye [#{global.app_env}]"
 
   global.mongosrv = new mongo.Server config.mongo.host, config.mongo.port,
     poolSize: 10
