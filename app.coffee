@@ -73,31 +73,21 @@ startServer = ->
       fs.utimesSync config.faye.socket, new Date(), new Date()
       fs.unlinkSync config.faye.socket
 
-    faye.listen config.faye.socket
-    process.umask(oldmask)
+    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
+
+    faye.listen config.faye.socket,
+      key: config.sslKey
+      cert: config.sslCert
 
     console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+
+    faye.listen config.faye.socket
+    process.umask(oldmask)
 
   else
     # Start listening to the faye server port.
     faye.listen config.faye.port
     console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (port)"
-
-  if app_env == "production"
-    # Start listening to the secure unix socket.
-
-    oldmask = process.umask(0o0000)
-
-    if fs.existsSync config.faye.socketSecure
-      fs.utimesSync config.faye.socketSecure, new Date(), new Date()
-      fs.unlinkSync config.faye.socketSecure
-
-    faye.listen config.faye.socketSecure,
-      key: config.sslKey
-      cert: config.sslCert
-    process.umask(oldmask)
-
-    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
 
   # Get the faye client
   global.fayeCli = faye.getClient()
