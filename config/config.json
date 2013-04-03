@@ -37,7 +37,7 @@
     "sslKey": "/var/cert/cloudsdale.org.key",
     "sslCert": "/var/cert/cloudsdale.org.cert",
     "faye": {
-      "host": "ovh.push.cloudsdale.org",
+      "host": "push.cloudsdale.org",
       "socket": "/tmp/cloudsdale-push.socket",
       "socketSecure": "/tmp/cloudsdale-push-secure.socket",
       "port": 80,

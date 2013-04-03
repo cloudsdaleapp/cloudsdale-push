@@ -13,7 +13,7 @@ set :ruby_version,  "ruby-1.9.3-p194"
 
 set :scm,         :git
 set :repository,  "git@github.com:IOMUSE/Cloudsdale-Faye.git"
-set :branch,      "ovh-migration"
+set :branch,      "master"
 
 set :migrate_target,  :current
 set :ssh_options,     { :forward_agent => true }
@@ -30,7 +30,7 @@ set :user,  "deploy"
 set :group, "deploy"
 set :use_sudo, false
 
-role :app,  "ovh.cloudsdale.org", :primary => true
+role :app,  "www.cloudsdale.org", :primary => true
 
 set :shared_children, %w(log node_modules)
 
