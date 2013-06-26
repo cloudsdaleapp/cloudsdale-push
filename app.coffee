@@ -2,17 +2,12 @@
 # Read the environment variable
 global.app_env = process.env.NODE_ENV || "development"
 
-require("nodetime").profile
-  accountKey: "772a1d683f599c2ed95cce79bb82308cd9d1e36c"
-  appName: "Cloudsdale #{app_env}"
-
 # Setup the environment configuration
 global.config = require("./config/config.json")[app_env]
 
 global.redisExpire = 86400
 
 # Load all dependent libraries
-daemon = require("daemon")
 http = require("http")
 _faye = require("./node_modules/faye/build")
 fayeRedis = require('faye-redis')
@@ -107,20 +102,22 @@ startServer = ->
       queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
         fayeCli.publish message.channel, message.data
 
-if app_env == "production"
+startServer()
 
-  daemon.daemonize
-    stdout: config.logFile,
-    config.pidFile, (err, pid) ->
+# if app_env == "production"
 
-      return console.log("Master: error starting daemon: " + err) if err
-      console.log "Daemon started successfully with pid: " + pid
+#   daemon.daemonize
+#     stdout: config.logFile,
+#     config.pidFile, (err, pid) ->
 
-      daemon.closeStdin()
-      startServer()
+#       return console.log("Master: error starting daemon: " + err) if err
+#       console.log "Daemon started successfully with pid: " + pid
 
-else
-  startServer()
+#       daemon.closeStdin()
+#       startServer()
+
+# else
+#   startServer()
 
 # try
 #   init_queue()

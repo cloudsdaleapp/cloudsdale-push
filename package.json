@@ -8,15 +8,12 @@
   "dependencies": {
 
     "faye": "git://github.com/Zeeraw/faye.git#f1e58aed6555d034c48abc7e613d08c693640fc3",
-    "faye-redis":"*",
-    "hiredis": "",
-    "redis": "",
+    "faye-redis":"0.1.1",
+    "hiredis": "0.1.14",
+    "redis": "0.8.2",
     "amqp": "git://github.com/mattbornski/node-amqp.git#master",
-    "coffee-script": "*",
-    "daemon": "*",
-    "mongodb":"*",
-    "nodetime":"*"
-
+    "coffee-script": "1.4.0",
+    "mongodb":"1.2.6"
   }
 
 }
