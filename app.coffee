@@ -1,6 +1,6 @@
 
 # Read the environment variable
-global.app_env = process.env.NODE_ENV || "development"
+global.app_env = process.env.NODE_ENV || "production"
 
 # Setup the environment configuration
 global.config = require("./config/config.json")[app_env]
