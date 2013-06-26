@@ -48,7 +48,7 @@ startServer = ->
       type: fayeRedis
       host: config.redis.host
       port: config.redis.port
-      namespace: "faye"
+      namespace: "cloudsdale:faye"
 
   global.fayengine = faye._server._engine._engine
   global.rediscli = faye._server._engine._engine._redis
