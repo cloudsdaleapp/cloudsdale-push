@@ -28,14 +28,15 @@ startServer = ->
 
   if app_env == "production"
 
-    replica_set = new ReplSetServers([
+    replica_set = new mongo.ReplSetServers([
       new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
       new mongo.Server( "127.0.0.1", 27018, mongoconfig ),
       new mongo.Server( "127.0.0.1", 27019, mongoconfig )
     ])
 
-    global.mongodb = new mongo.Db config.mongo.database, replica_set,
+    global.mongodb = new mongo.Db(config.mongo.database, replica_set,
       safe: true
+    )
 
   else
     mongo_server = new mongo.Server(
