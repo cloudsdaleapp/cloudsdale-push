@@ -19,14 +19,33 @@ fs = require('fs')
 startServer = ->
   console.log "=> Booting Node.js faye [#{global.app_env}]"
 
-  global.mongosrv = new mongo.Server config.mongo.host, config.mongo.port,
+  mongoconfig = {
     poolSize: 10
     auto_reconnect: true
     socketOptions:
       timeout: 60 * 1000
+  }
 
-  global.mongodb = new mongo.Db config.mongo.database, mongosrv,
-    safe: true
+  if app_env == "production"
+
+    replica_set = new ReplSetServers([
+      new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
+      new mongo.Server( "127.0.0.1", 27018, mongoconfig ),
+      new mongo.Server( "127.0.0.1", 27019, mongoconfig )
+    ])
+
+    global.mongodb = new mongo.Db config.mongo.database, replica_set,
+      safe: true
+
+  else
+    mongo_server = new mongo.Server(
+      config.mongo.host,
+      config.mongo.port,
+      mongoconfig
+    )
+
+    global.mongodb = new mongo.Db config.mongo.database, mongo_server,
+      safe: true
 
   mongodb.open (err, p_client) ->
     if err
