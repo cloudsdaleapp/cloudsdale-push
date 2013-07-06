@@ -26,7 +26,7 @@ startServer = ->
       timeout: 60 * 1000
   }
 
-  if app_env == "production"
+  if app_env == "production_replica"
 
     replica_set = new mongo.ReplSetServers([
       new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
