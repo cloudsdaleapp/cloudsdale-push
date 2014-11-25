@@ -1,6 +1,4 @@
-
 # Read the environment variable
-global.app_env = process.env.NODE_ENV || "development"
 global.redisExpire = 86400
 
 # Load all dependent libraries
@@ -59,7 +57,7 @@ redisEngineConfig = (url) ->
 
   opts = {}
   opts.type = redis
-  opts.host = url.hosename if url.hostname
+  opts.host = url.hostname if url.hostname
   opts.port = url.port  if url.port
   opts.database = url.pathname.slice(1)
   opts.namespace = "cloudsdale:faye"
@@ -95,7 +93,7 @@ connectFaye = (bayeux) ->
   return client
 
 exports.run = ->
-  console.log "Booting Node.js faye [#{ global.app_env }]"
+  console.log "Booting node.js faye [#{ (process.env.FAYE_ENV || "development") }]"
 
   global.mongodb = connectMongoDB(process.env.MONGO_URL || "mongo://127.0.0.1:27017/cloudsdale")
   global.fayeServer = startFaye(process.env.FAYE_URL || "ws://0.0.0.0:8282/push")
@@ -106,7 +104,7 @@ exports.run = ->
 
   rabbit = connectRabbit(process.env.AMQP_URL || "amqp://guest:guest@localhost")
   rabbit.on "ready", ->
-    rabbit.queue "faye", { passive: true, durable: true }, (queue) ->
+    rabbit.queue "faye", { passive: false, durable: true, noDeclare: false, autoDelete: false }, (queue) ->
       queue.bind("#")
       queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
         fayeClient.publish(message.channel, message.data)
