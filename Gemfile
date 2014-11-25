@@ -1,4 +1,5 @@
-source 'http://rubygems.org'
+source "http://rubygems.org"
+ruby "2.1.5"
 
-gem 'capistrano'
-gem 'capistrano_colors'
+gem "capistrano"
+gem "capistrano_colors"
