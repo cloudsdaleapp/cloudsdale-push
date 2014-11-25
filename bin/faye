@@ -1,0 +1,5 @@
+#! /usr/bin/env node
+
+path = require("path");
+global.root_path = path.dirname(require.main.filename).split("bin")[0]
+require(root_path + "server.js");

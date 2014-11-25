@@ -1,6 +1,5 @@
-app:
+faye:
   build: .
-  command: "node server.js"
   ports:
    - "8282:8282"
   links:
@@ -8,20 +7,19 @@ app:
     - redis
     - rabbit
   volumes:
-    - .:/usr/src/push.cloudsdale.org
+    - .:/usr/src/cloudsdale-push
   environment:
-    NODE_ENV: development
     AMQP_URL: amqp://admin:pass@rabbit:5672
-    MONGO_URL: mongo://mongo/cloudsdale
+    MONGO_URL: mongo://mongo:27017/cloudsdale
     REDIS_URL: redis://redis:6379/0
 
-    FAYE_URL: http://127.0.0.1:8282/push?timeout=45
-    FAYE_SSL_URL: https://127.0.0.1:8282/push?timeout=45
+    FAYE_ENV: development
+    FAYE_URL: ws://0.0.0.0:8282/push
     FAYE_TOKEN: 650659cd4801877e56a176d70dcd4851fa4c86327b3b9439fef2fbf77543b8e2
 
 mongo:
   image: mongo:2.4.10
-  command: mongod --smallfiles --verbose
+  command: mongod --smallfiles
   ports:
     - "27017:27017"
 

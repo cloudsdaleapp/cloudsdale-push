@@ -2,6 +2,10 @@
   "name": "cloudsdale-faye",
   "version": "0.0.0",
   "node": "0.6.18",
+  "main": "server.js",
+  "scripts": {
+    "start": "bin/faye"
+  },
   "description": "Used to push information to Cloudsdale Clients.",
   "author" : { "name" : "Philip Vieira" },
   "dependencies": {

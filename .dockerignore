@@ -1,0 +1,8 @@
+README.md
+Capfile
+Gemfile
+Gemfile.lock
+fig.yml
+.ruby-version
+lib/
+config/
