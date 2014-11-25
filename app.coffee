@@ -1,154 +1,113 @@
 
 # Read the environment variable
-global.app_env = process.env.NODE_ENV || "production"
-
-# Setup the environment configuration
-global.config = require("./config/config.json")[app_env]
-
+global.app_env = process.env.NODE_ENV || "development"
 global.redisExpire = 86400
 
 # Load all dependent libraries
-http = require("http")
-_faye = require("./node_modules/faye/build")
-fayeRedis = require('faye-redis')
-amqp = require("amqp")
-global.mongo = require('mongodb')
-redis = require('redis')
-fs = require('fs')
+global.http = require("http")
+global.amqp = require("amqp")
+global.mongo = require("mongodb")
+global.redis = require("faye-redis")
+global.faye = require("faye")
+global.fs = require("fs")
 
-startServer = ->
-  console.log "=> Booting Node.js faye [#{global.app_env}]"
+global.Url = require("url")
+global.QueryString = require("querystring")
 
-  mongoconfig = {
-    poolSize: 10
-    auto_reconnect: true
-    socketOptions:
-      timeout: 60 * 1000
-  }
+connectMongoDB = (url) ->
 
-  if app_env == "production_replica"
+  url = Url.parse(url)
 
-    replica_set = new mongo.ReplSetServers([
-      new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
-      new mongo.Server( "127.0.0.1", 27018, mongoconfig ),
-      new mongo.Server( "127.0.0.1", 27019, mongoconfig )
-    ])
+  host = url.hostname
+  port = url.port
 
-    global.mongodb = new mongo.Db(config.mongo.database, replica_set,
-      safe: true
-    )
+  opts = if url.query then QueryString.parse(url.query) else {}
+  opts.poolSize ||= 10
+  opts.auto_reconnect ||= true
+  opts.socketOptions ||= {}
+  opts.socketOptions.timeout || = 60 * 1000
 
-  else
-    mongo_server = new mongo.Server(
-      config.mongo.host,
-      config.mongo.port,
-      mongoconfig
-    )
+  database = url.pathname.slice(1) if url.pathname
 
-    global.mongodb = new mongo.Db config.mongo.database, mongo_server,
-      safe: true
+  server = new mongo.Server(host, port, opts)
 
-  mongodb.open (err, p_client) ->
-    if err
-      console.log err
-    else
-      mongodb.authenticate config.mongo.database, config.mongo.password, {}, ->
-        console.log "=> Connected to MongoDB on #{config.mongo.host}:#{config.mongo.port}"
+  # replica_set = new mongo.ReplSetServers([
+  #   new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
+  #   new mongo.Server( "127.0.0.1", 27018, mongoconfig ),
+  #   new mongo.Server( "127.0.0.1", 27019, mongoconfig )
+  # ])
 
-  # Initialize the faye server
-  faye = new _faye.NodeAdapter
-    mount: config.faye.path
-    timeout: config.faye.timeout
-    engine:
-      type: fayeRedis
-      host: config.redis.host
-      port: config.redis.port
-      namespace: "cloudsdale:faye"
+  db = new mongo.Db(database, server, safe: true)
 
-  global.fayengine = faye._server._engine._engine
-  global.rediscli = faye._server._engine._engine._redis
+  db.open (err, client) ->
+    throw err if err
+    if url.auth
+      auth = url.auth.split(":")
+      mongodb.authenticate auth[0], auth[1], {}, ->
+        console.log "MongoDB connection on #{host}:#{port}"
 
-  # Require all extentions
+  return db
+
+connectRabbit = (url) ->
+  rabbit = amqp.createConnection(url: url, vhost: "/")
+  rabbit.on "ready", -> console.log "RabbitMQ connection on #{ url }"
+  rabbit.on "close", -> console.log "RabbitMQ connection could not be established"
+  return rabbit
+
+redisEngineConfig = (url) ->
+  url = Url.parse(url)
+
+  opts = {}
+  opts.type = redis
+  opts.host = url.hosename if url.hostname
+  opts.port = url.port  if url.port
+  opts.database = url.pathname.slice(1)
+  opts.namespace = "cloudsdale:faye"
+
+  return opts
+
+startFaye = (url, engine) ->
+  url = Url.parse(url)
+  opts = if url.query then QueryString.parse(url.query) else { timeout: 45 }
+
+  server = new faye.NodeAdapter
+    mount: url.pathname
+    timeout: opts.timeout
+    engine: redisEngineConfig(process.env.REDIS_URL || "redis://127.0.0.1:6379/0")
+
   userAuthExt   = require("./ext/user_auth")
   serverAuthExt = require("./ext/server_auth")
-  clientAuthExt = require("./ext/client_auth")
   userHeartbeat = require("./ext/user_heartbeat")
 
-  # Add all extentions
-  faye.addExtension(userAuthExt)
-  faye.addExtension(serverAuthExt)
-  faye.addExtension(userHeartbeat)
+  server.addExtension(userAuthExt)
+  server.addExtension(serverAuthExt)
+  server.addExtension(userHeartbeat)
 
-  if app_env == "production"
-    # Start listening to a unix socket.
+  console.log "Node.js cloudsdale-faye started on #{ url.href }"
+  server.listen(url.port)
 
-    oldmask = process.umask(0o0000)
+  return server
 
-    if fs.existsSync config.faye.socket
-      fs.utimesSync config.faye.socket, new Date(), new Date()
-      fs.unlinkSync config.faye.socket
+connectFaye = (bayeux) ->
+  client = bayeux.getClient()
+  client.addExtension require("./ext/client_auth")
+  client.connect()
+  return client
 
-    faye.listen config.faye.socket,
-      key: config.sslKey
-      cert: config.sslCert
-    console.log "=> Node.js cloudsdale-faye-ssl started on wss://#{config.faye.host}:#{config.faye.secure_port}#{config.faye.path} (socket)"
+exports.run = ->
+  console.log "Booting Node.js faye [#{ global.app_env }]"
 
-    fs.unlinkSync config.faye.socket
+  global.mongodb = connectMongoDB(process.env.MONGO_URL || "mongo://127.0.0.1:27017/cloudsdale")
+  global.fayeServer = startFaye(process.env.FAYE_URL || "ws://0.0.0.0:8282/push")
+  global.fayeClient = connectFaye(fayeServer)
 
-    faye.listen config.faye.socket
-    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (socket)"
+  global.fayeEngine = fayeServer._server._engine._engine
+  global.redisClient = fayeServer._server._engine._engine._redis
 
-    process.umask(oldmask)
-
-  else
-    # Start listening to the faye server port.
-    faye.listen config.faye.port
-    console.log "=> Node.js cloudsdale-faye started on ws://#{config.faye.host}:#{config.faye.port}#{config.faye.path} (port)"
-
-  # Get the faye client
-  global.fayeCli = faye.getClient()
-  fayeCli.addExtension(clientAuthExt)
-
-  fayeCli.connect()
-
-  # Initialize the amqp consumer
-  connection = amqp.createConnection { host: config.rabbit.host, user: config.rabbit.user, pass: config.rabbit.pass },
-    reconnect: true
-
-  # When AMQP connection is ready, start subscribing to the faye queue.
-  connection.on "ready", ->
-    connection.queue "faye", { passive: true, durable: true }, (queue) ->
-      queue.bind "#"
+  rabbit = connectRabbit(process.env.AMQP_URL || "amqp://guest:guest@localhost")
+  rabbit.on "ready", ->
+    rabbit.queue "faye", { passive: true, durable: true }, (queue) ->
+      queue.bind("#")
       queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
-        fayeCli.publish message.channel, message.data
+        fayeClient.publish(message.channel, message.data)
 
-startServer()
-
-# if app_env == "production"
-
-#   daemon.daemonize
-#     stdout: config.logFile,
-#     config.pidFile, (err, pid) ->
-
-#       return console.log("Master: error starting daemon: " + err) if err
-#       console.log "Daemon started successfully with pid: " + pid
-
-#       daemon.closeStdin()
-#       startServer()
-
-# else
-#   startServer()
-
-# try
-#   init_queue()
-# catch err
-#   console.log "Error: #{err}"
-#   console.log "cloud not connect to [faye] queue... retrying in 10 seconds..."
-#   console.log "reload your web page to get the rails server to create the queue."
-#   init_queue()
-
-# init_queue = ->
-#   connection.queue "faye", { passive: true, durable: true }, (queue) ->
-#     queue.bind "#"
-#     queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
-#       client.publish message.channel, message.data

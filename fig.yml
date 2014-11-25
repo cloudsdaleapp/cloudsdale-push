@@ -1,0 +1,42 @@
+app:
+  build: .
+  command: "node server.js"
+  ports:
+   - "8282:8282"
+  links:
+    - mongo
+    - redis
+    - rabbit
+  volumes:
+    - .:/usr/src/push.cloudsdale.org
+  environment:
+    NODE_ENV: development
+    AMQP_URL: amqp://admin:pass@rabbit:5672
+    MONGO_URL: mongo://mongo/cloudsdale
+    REDIS_URL: redis://redis:6379/0
+
+    FAYE_URL: http://127.0.0.1:8282/push?timeout=45
+    FAYE_SSL_URL: https://127.0.0.1:8282/push?timeout=45
+    FAYE_TOKEN: 650659cd4801877e56a176d70dcd4851fa4c86327b3b9439fef2fbf77543b8e2
+
+mongo:
+  image: mongo:2.4.10
+  command: mongod --smallfiles --verbose
+  ports:
+    - "27017:27017"
+
+redis:
+  image: redis:latest
+  command: redis-server
+  ports:
+    - "6379:6379"
+
+rabbit:
+  image: tutum/rabbitmq:latest
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+  volumes:
+    - /var/log/rabbitmq
+  environment:
+    - RABBITMQ_PASS=pass

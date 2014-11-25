@@ -4,6 +4,6 @@ exports.incoming = (message, callback) ->
 exports.outgoing = (message, callback) ->
 
   message.ext ||= {}
-  message.ext.server_token = config.faye.token
+  message.ext.server_token = process.env.FAYE_TOKEN
 
   callback(message)

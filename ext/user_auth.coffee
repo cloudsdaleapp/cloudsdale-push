@@ -12,7 +12,7 @@ exports.incoming = (message, callback) ->
   # console.log "Auth Token: #{token}"
 
   if token
-    rediscli.get "cloudsdale/users/#{token}/id", (err,userId) ->
+    redisClient.get "cloudsdale/users/#{token}/id", (err,userId) ->
       callback(message) if err
       if userId
         message.ext.user_id = userId.toString()
@@ -24,8 +24,8 @@ exports.incoming = (message, callback) ->
             callback(message) if err
             if user != null
               userId = user._id.toString()
-              rediscli.set "cloudsdale/users/#{token}/id", userId
-              rediscli.expire "cloudsdale/users/#{token}/id", redisExpire
+              redisClient.set "cloudsdale/users/#{token}/id", userId
+              redisClient.expire "cloudsdale/users/#{token}/id", redisExpire
               message.ext.user_id = userId
               callback(message)
             else

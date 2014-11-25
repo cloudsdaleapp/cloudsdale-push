@@ -34,12 +34,12 @@ refreshPresence = (userId,clientId,hearbeatInterval,firstPass) ->
 checkStatusAndBroadcast = (user,clientId,hearbeatInterval,firstPass) ->
   setUserHeartbeat(user,Date.now())
 
-  fayengine.clientExists clientId, (connected,score) ->
+  fayeEngine.clientExists clientId, (connected,score) ->
     if connected
       status = user.preferred_status
       broadcastStatus(user,status) if (status != "offline") and (firstPass == true)
     else
-      rediscli.get "cloudsdale/users/#{user._id.toString()}", (err, lastSeen) ->
+      redisClient.get "cloudsdale/users/#{user._id.toString()}", (err, lastSeen) ->
         lastSeen ||= 0
 
         if Date.now() > lastSeen
@@ -52,22 +52,22 @@ setUserHeartbeat = (user,time) ->
   userId   = user._id.toString()
   cloudIds = user.cloud_ids
 
-  rediscli.set "cloudsdale/users/#{userId}", time
-  rediscli.expire "cloudsdale/users/#{userId}", redisExpire
+  redisClient.set "cloudsdale/users/#{userId}", time
+  redisClient.expire "cloudsdale/users/#{userId}", redisExpire
 
   if cloudIds
     for cloudId in cloudIds
-      do (cloudId) -> rediscli.hset "cloudsdale/clouds/#{cloudId}/users", userId, time
+      do (cloudId) -> redisClient.hset "cloudsdale/clouds/#{cloudId}/users", userId, time
 
 clearUserHeartbeat = (user) ->
   userId   = user._id.toString()
   cloudIds = user.cloud_ids
 
-  rediscli.del "cloudsdale/users/#{userId}"
+  redisClient.del "cloudsdale/users/#{userId}"
 
   if cloudIds
     for cloudId in cloudIds
-      do (cloudId) -> rediscli.hdel "cloudsdale/clouds/#{cloudId}/users", userId
+      do (cloudId) -> redisClient.hdel "cloudsdale/clouds/#{cloudId}/users", userId
 
 broadcastStatus = (user,status) ->
 
@@ -77,5 +77,5 @@ broadcastStatus = (user,status) ->
 
   if cloudIds
     for cloudId in cloudIds
-      do (cloudId) -> fayeCli.publish "/clouds/#{cloudId}/users/#{userId}", { id: userId, status: status }
+      do (cloudId) -> fayeClient.publish "/clouds/#{cloudId}/users/#{userId}", { id: userId, status: status }
 

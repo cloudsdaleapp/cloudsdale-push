@@ -4,7 +4,7 @@ exports.incoming = (message, callback) ->
 
   if !message.channel.match(/meta/ig)
     if !message.channel.match(/clouds\/(.*)\/users/ig)
-      message.error = 'Invalid authentication token' if message.ext.server_token != config.faye.token
+      message.error = 'Invalid authentication token' if message.ext.server_token != process.env.FAYE_TOKEN
 
   callback(message)
 
