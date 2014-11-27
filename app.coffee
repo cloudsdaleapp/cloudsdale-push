@@ -29,12 +29,6 @@ connectMongoDB = (url) ->
 
   server = new mongo.Server(host, port, opts)
 
-  # replica_set = new mongo.ReplSetServers([
-  #   new mongo.Server( "127.0.0.1", 27017, mongoconfig ),
-  #   new mongo.Server( "127.0.0.1", 27018, mongoconfig ),
-  #   new mongo.Server( "127.0.0.1", 27019, mongoconfig )
-  # ])
-
   db = new mongo.Db(database, server, safe: true)
 
   db.open (err, client) ->
