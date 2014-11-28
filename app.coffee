@@ -98,7 +98,7 @@ exports.run = ->
 
   rabbit = connectRabbit(process.env.AMQP_URL || "amqp://guest:guest@localhost")
   rabbit.on "ready", ->
-    rabbit.exchange "cloudsdale.push", { type: "direct", auto_delete: false }, (exchange) ->
+    rabbit.exchange "cloudsdale.push", { type: "direct", autoDelete: false }, (exchange) ->
       rabbit.queue "cloudsdale.push", { passive: false, durable: true, noDeclare: false, autoDelete: false }, (queue) ->
         queue.bind(exchange, "#")
         queue.subscribe { ack: false }, (message, headers, deliveryInfo) ->
