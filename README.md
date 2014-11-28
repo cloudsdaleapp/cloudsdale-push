@@ -1,10 +1,14 @@
-# Cloudsdale Node.js Faye server
+# Cloudsdale push service
 
+## Get started
 
-## Setup Guide:
+### Install Fig
+You can find out how to install fig on their [website](http://fig.sh).
+If you're on Mac we recommend using fig together with [boot2docker](http://boot2docker.io)
 
-#### Step 1 - Install Node.js
+### Run the service
+This will get you set up with everything you need.
 
-#### Step 2 - RVM & Ruby
-
-#### Step 3 - Start the server
+```bash
+$ fig up
+```
