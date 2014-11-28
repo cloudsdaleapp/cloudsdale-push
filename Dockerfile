@@ -1,4 +1,4 @@
-FROM node:0.11.14
+FROM node:0.8.28
 
 ENV APP_HOME /usr/src/cloudsdale-push
 ENV DEBIAN_FRONTEND noninteractive
